@@ -2,7 +2,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Sun, Moon } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 import { useTheme, THEME_META } from '../context/ThemeContext';
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -88,64 +88,11 @@ function HexLogo({ onClick }) {
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
-   DARK / LIGHT TOGGLE
-   ─────────────────────────────────────────────────────────────────────────── */
-
-function ModeToggle({ isDark, toggleDarkMode }) {
-  return (
-    <button
-      onClick={toggleDarkMode}
-      aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
-      className="relative w-9 h-9 flex items-center justify-center rounded-full transition-all duration-200"
-      style={{
-        border: '1px solid rgba(var(--color-primary-rgb), 0.25)',
-        background: 'rgba(var(--color-primary-rgb), 0.06)',
-        color: 'var(--color-primary)',
-      }}
-      onMouseEnter={e => {
-        e.currentTarget.style.background   = 'rgba(var(--color-primary-rgb), 0.15)';
-        e.currentTarget.style.borderColor  = 'var(--color-primary)';
-        e.currentTarget.style.boxShadow    = '0 0 12px var(--color-glow)';
-      }}
-      onMouseLeave={e => {
-        e.currentTarget.style.background   = 'rgba(var(--color-primary-rgb), 0.06)';
-        e.currentTarget.style.borderColor  = 'rgba(var(--color-primary-rgb), 0.25)';
-        e.currentTarget.style.boxShadow    = 'none';
-      }}
-    >
-      <AnimatePresence mode="wait" initial={false}>
-        {isDark ? (
-          <motion.span
-            key="moon"
-            initial={{ rotate: -90, opacity: 0, scale: 0.6 }}
-            animate={{ rotate: 0,   opacity: 1, scale: 1   }}
-            exit={{    rotate: 90,  opacity: 0, scale: 0.6 }}
-            transition={{ duration: 0.22 }}
-          >
-            <Moon size={16} />
-          </motion.span>
-        ) : (
-          <motion.span
-            key="sun"
-            initial={{ rotate: 90,  opacity: 0, scale: 0.6 }}
-            animate={{ rotate: 0,   opacity: 1, scale: 1   }}
-            exit={{    rotate: -90, opacity: 0, scale: 0.6 }}
-            transition={{ duration: 0.22 }}
-          >
-            <Sun size={16} />
-          </motion.span>
-        )}
-      </AnimatePresence>
-    </button>
-  );
-}
-
-/* ─────────────────────────────────────────────────────────────────────────────
    NAVBAR
    ─────────────────────────────────────────────────────────────────────────── */
 
 export default function Navbar() {
-  const { activeTheme, isDark, toggleDarkMode, themeMeta } = useTheme();
+  const { activeTheme, themeMeta } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
   const isHome = location.pathname === '/';
@@ -342,8 +289,6 @@ export default function Navbar() {
 
           {/* Right controls */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <ModeToggle isDark={isDark} toggleDarkMode={toggleDarkMode} />
-
             <button
               className="md:hidden"
               style={{
@@ -506,9 +451,8 @@ export default function Navbar() {
                     fontFamily: "'JetBrains Mono', monospace",
                   }}
                 >
-                  {themeMeta?.[activeTheme]?.label ?? activeTheme} · {isDark ? 'Dark' : 'Light'}
+                  {themeMeta?.[activeTheme]?.label ?? activeTheme}
                 </span>
-                <ModeToggle isDark={isDark} toggleDarkMode={toggleDarkMode} />
               </div>
             </motion.aside>
           </>

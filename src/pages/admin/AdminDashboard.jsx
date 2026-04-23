@@ -1,6 +1,6 @@
 // src/pages/admin/AdminDashboard.jsx
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -8,9 +8,9 @@ import {
   Palette, User, LogOut, Menu, X, Plus, Edit2, Trash2,
   Check, Eye, EyeOff, ExternalLink, Home,
   Star, StarOff, CheckCircle, AlertCircle, Loader2, Save,
+  FileUp, Download, Trash2 as Trash2Alt,
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
-import { useTheme } from '../../context/ThemeContext';
 
 /* ═══════════════════════════════════════════════════════════════════════════
    SHARED PRIMITIVES
@@ -1511,6 +1511,145 @@ function SidebarItem({ icon: Icon, label, active, onClick, badge }) {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
+   CV / RESUME TAB
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+function CvTab({ toast }) {
+  const [currentUrl, setCurrentUrl] = useState('');
+  const [uploading,  setUploading]  = useState(false);
+  const [loading,    setLoading]    = useState(true);
+  const fileRef = useRef(null);
+
+  useEffect(() => {
+    supabase
+      .from('site_settings')
+      .select('value')
+      .eq('key', 'cv_url')
+      .single()
+      .then(({ data }) => {
+        if (data?.value) setCurrentUrl(data.value);
+        setLoading(false);
+      });
+  }, []);
+
+  async function handleUpload(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.type !== 'application/pdf') {
+      toast.show('Only PDF files are allowed.', 'error');
+      e.target.value = '';
+      return;
+    }
+    setUploading(true);
+    const fileName = `cv_${Date.now()}.pdf`;
+    const { error: uploadErr } = await supabase.storage
+      .from('cv')
+      .upload(fileName, file, { upsert: true, contentType: 'application/pdf' });
+    if (uploadErr) {
+      toast.show('Upload failed: ' + uploadErr.message, 'error');
+      setUploading(false);
+      return;
+    }
+    const { data: { publicUrl } } = supabase.storage.from('cv').getPublicUrl(fileName);
+    const { error: dbErr } = await supabase
+      .from('site_settings')
+      .upsert({ key: 'cv_url', value: publicUrl }, { onConflict: 'key' });
+    if (dbErr) {
+      toast.show('File uploaded but URL not saved: ' + dbErr.message, 'error');
+    } else {
+      setCurrentUrl(publicUrl);
+      toast.show('CV updated successfully!', 'success');
+    }
+    setUploading(false);
+    e.target.value = '';
+  }
+
+  async function handleRemove() {
+    const { error: dbErr } = await supabase
+      .from('site_settings')
+      .upsert({ key: 'cv_url', value: '' }, { onConflict: 'key' });
+    if (dbErr) {
+      toast.show('Failed to remove CV: ' + dbErr.message, 'error');
+    } else {
+      setCurrentUrl('');
+      toast.show('CV removed.', 'success');
+    }
+  }
+
+  return (
+    <div className="flex flex-col gap-6">
+      <div>
+        <h2 className="text-2xl font-bold" style={{ color: 'var(--mode-text)', fontFamily: 'Space Grotesk, sans-serif' }}>Resume / CV</h2>
+        <p className="text-sm mt-1" style={{ color: 'var(--mode-text-muted)' }}>Upload a PDF — the Download CV button on the homepage will link directly to it.</p>
+      </div>
+
+      {/* Current CV */}
+      <div
+        className="rounded-xl p-5 flex flex-col gap-4"
+        style={{ background: 'rgba(var(--color-primary-rgb),0.04)', border: '1px solid var(--color-border)' }}
+      >
+        <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'var(--mode-text-muted)', fontFamily: 'Space Grotesk, sans-serif' }}>Current CV</p>
+        {loading ? (
+          <div className="flex items-center gap-2" style={{ color: 'var(--mode-text-muted)' }}><Spinner /> Loading&hellip;</div>
+        ) : currentUrl ? (
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+            <a
+              href={currentUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 text-sm font-medium"
+              style={{ color: 'var(--color-primary)', wordBreak: 'break-all' }}
+            >
+              <Download size={14} />
+              View current CV
+            </a>
+            <button
+              onClick={handleRemove}
+              className="flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg transition-colors"
+              style={{ color: '#FF4D6D', background: 'rgba(255,77,109,0.1)', border: '1px solid rgba(255,77,109,0.25)' }}
+            >
+              <Trash2Alt size={13} /> Remove
+            </button>
+          </div>
+        ) : (
+          <p className="text-sm" style={{ color: 'var(--mode-text-muted)' }}>No CV uploaded yet.</p>
+        )}
+      </div>
+
+      {/* Upload new CV */}
+      <div
+        className="rounded-xl p-5 flex flex-col gap-4"
+        style={{ background: 'rgba(var(--color-primary-rgb),0.04)', border: '1px solid var(--color-border)' }}
+      >
+        <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'var(--mode-text-muted)', fontFamily: 'Space Grotesk, sans-serif' }}>Upload New CV</p>
+        <p className="text-xs" style={{ color: 'var(--mode-text-muted)' }}>PDF only &middot; max 10 MB &middot; uploading a new file replaces the old one on the site immediately.</p>
+        <input
+          ref={fileRef}
+          type="file"
+          accept="application/pdf"
+          onChange={handleUpload}
+          style={{ display: 'none' }}
+        />
+        <button
+          onClick={() => fileRef.current?.click()}
+          disabled={uploading}
+          className="flex items-center gap-2 self-start px-5 py-2.5 rounded-lg font-semibold text-sm transition-all"
+          style={{
+            background: uploading ? 'rgba(var(--color-primary-rgb),0.1)' : 'rgba(var(--color-primary-rgb),0.15)',
+            border: '1px solid rgba(var(--color-primary-rgb),0.35)',
+            color: 'var(--color-primary)',
+            cursor: uploading ? 'not-allowed' : 'pointer',
+            opacity: uploading ? 0.7 : 1,
+          }}
+        >
+          {uploading ? <><Spinner size={14} /> Uploading&hellip;</> : <><FileUp size={15} /> Choose PDF</>}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
    DASHBOARD ROOT
    ═══════════════════════════════════════════════════════════════════════════ */
 
@@ -1523,6 +1662,7 @@ const TABS = [
   { id: 'upcoming',  label: 'Upcoming',           icon: Clock         },
   { id: 'theme',     label: 'Theme Manager',      icon: Palette       },
   { id: 'about',     label: 'About Me',           icon: User          },
+  { id: 'cv',        label: 'Resume / CV',        icon: FileUp        },
 ];
 
 export default function AdminDashboard() {
@@ -1531,10 +1671,8 @@ export default function AdminDashboard() {
   const [unreadCount, setUnreadCount] = useState(0);
   const navigate = useNavigate();
   const toast = useToast();
-  const { isDark, toggleDarkMode } = useTheme();
-
-  function logout() {
-    sessionStorage.removeItem('nf_admin_token');
+  async function logout() {
+    await supabase.auth.signOut();
     navigate('/admin');
   }
 
@@ -1687,34 +1825,6 @@ export default function AdminDashboard() {
           </a>
 
           <button
-            onClick={toggleDarkMode}
-            className="w-full flex items-center text-left transition-all"
-            style={{
-              gap: 12,
-              padding: '10px 14px',
-              borderRadius: 10,
-              fontSize: '0.875rem',
-              color: 'var(--mode-text-muted)',
-              background: 'transparent',
-              border: 'none',
-              cursor: 'pointer',
-            }}
-            onMouseEnter={e => {
-              e.currentTarget.style.background = 'rgba(var(--color-primary-rgb),0.08)';
-              e.currentTarget.style.color = 'var(--color-primary)';
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.background = 'transparent';
-              e.currentTarget.style.color = 'var(--mode-text-muted)';
-            }}
-          >
-            {isDark ? <Eye size={17} /> : <EyeOff size={17} />}
-            <span style={{ fontFamily: 'Space Grotesk,sans-serif' }}>
-              {isDark ? 'Light Mode' : 'Dark Mode'}
-            </span>
-          </button>
-
-          <button
             onClick={logout}
             className="w-full flex items-center text-left transition-all"
             style={{
@@ -1858,8 +1968,9 @@ export default function AdminDashboard() {
               {activeTab === 'skills'    && <SkillsTab   {...tabProps} />}
               {activeTab === 'messages'  && <MessagesTab {...tabProps} onUnreadCount={setUnreadCount} />}
               {activeTab === 'upcoming'  && <UpcomingTab {...tabProps} />}
-              {activeTab === 'theme'     && <ThemeTab    {...tabProps} />}
               {activeTab === 'about'     && <AboutTab    {...tabProps} />}
+              {activeTab === 'cv'         && <CvTab       {...tabProps} />}
+              {activeTab === 'theme'     && <ThemeTab    {...tabProps} />}
             </motion.div>
           </AnimatePresence>
         </main>

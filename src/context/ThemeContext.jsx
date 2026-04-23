@@ -22,8 +22,7 @@ const VALID_THEMES = [
   'toxic-forge',
 ];
 
-const DEFAULT_THEME = 'cyber-blue';
-const DARK_MODE_KEY  = 'neural-forge-dark-mode';
+const DEFAULT_THEME  = 'cyber-blue';
 const SUPABASE_TABLE = 'site_settings';
 const SUPABASE_KEY   = 'active_theme';
 
@@ -80,7 +79,7 @@ const ThemeContext = createContext(null);
    HELPERS
    ─────────────────────────────────────────────────────────────────────────── */
 
-function applyThemeToDOM(theme, isDark) {
+function applyThemeToDOM(theme) {
   const root = document.documentElement;
 
   // Apply theme transition class for smooth colour changes
@@ -90,18 +89,9 @@ function applyThemeToDOM(theme, isDark) {
   // Set data-theme attribute (triggers CSS variable overrides in index.css)
   root.setAttribute('data-theme', theme);
 
-  // Set dark / light class (Tailwind darkMode: 'class')
-  root.classList.toggle('dark',  isDark);
-  root.classList.toggle('light', !isDark);
-}
-
-function getStoredDarkMode() {
-  try {
-    const stored = localStorage.getItem(DARK_MODE_KEY);
-    if (stored !== null) return stored === 'true';
-  } catch { /* localStorage unavailable */ }
-  // Default: respect OS preference
-  return window.matchMedia?.('(prefers-color-scheme: dark)').matches ?? true;
+  // Always dark
+  root.classList.add('dark');
+  root.classList.remove('light');
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -110,7 +100,6 @@ function getStoredDarkMode() {
 
 export function ThemeProvider({ children }) {
   const [activeTheme, setActiveThemeState] = useState(DEFAULT_THEME);
-  const [isDark, setIsDark]               = useState(true);
   const [isLoading, setIsLoading]         = useState(true);
   const [error, setError]                 = useState(null);
 
@@ -130,19 +119,12 @@ export function ThemeProvider({ children }) {
           ? data.value
           : DEFAULT_THEME;
 
-        const darkMode = getStoredDarkMode();
-
         setActiveThemeState(theme);
-        setIsDark(darkMode);
-        applyThemeToDOM(theme, darkMode);
+        applyThemeToDOM(theme);
       } catch (err) {
         console.warn('[ThemeContext] Failed to fetch theme from Supabase, using default.', err);
         setError(err.message);
-
-        // Graceful fallback
-        const darkMode = getStoredDarkMode();
-        setIsDark(darkMode);
-        applyThemeToDOM(DEFAULT_THEME, darkMode);
+        applyThemeToDOM(DEFAULT_THEME);
       } finally {
         setIsLoading(false);
       }
@@ -160,7 +142,7 @@ export function ThemeProvider({ children }) {
 
     // Optimistic update
     setActiveThemeState(theme);
-    applyThemeToDOM(theme, isDark);
+    applyThemeToDOM(theme);
 
     try {
       const { error: sbError } = await supabase
@@ -173,26 +155,14 @@ export function ThemeProvider({ children }) {
       setError(err.message);
       // Don't revert UI — the theme change is still visible locally
     }
-  }, [isDark]);
-
-  /* ── toggleDarkMode — persisted in localStorage ─────────────────────── */
-  const toggleDarkMode = useCallback(() => {
-    setIsDark(prev => {
-      const next = !prev;
-      try {
-        localStorage.setItem(DARK_MODE_KEY, String(next));
-      } catch { /* ignore */ }
-      applyThemeToDOM(activeTheme, next);
-      return next;
-    });
-  }, [activeTheme]);
+  }, []);
 
   /* ── Context value ───────────────────────────────────────────────────── */
   const value = useMemo(() => ({
     activeTheme,
     setActiveTheme,
-    isDark,
-    toggleDarkMode,
+    isDark: true,
+    toggleDarkMode: () => {},
     isLoading,
     error,
     validThemes: VALID_THEMES,
@@ -202,7 +172,7 @@ export function ThemeProvider({ children }) {
       .getPropertyValue('--color-primary').trim(),
     getAccent: () => getComputedStyle(document.documentElement)
       .getPropertyValue('--color-accent').trim(),
-  }), [activeTheme, setActiveTheme, isDark, toggleDarkMode, isLoading, error]);
+  }), [activeTheme, setActiveTheme, isLoading, error]);
 
   return (
     <ThemeContext.Provider value={value}>

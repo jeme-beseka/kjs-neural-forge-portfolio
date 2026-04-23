@@ -576,7 +576,8 @@ function ContactForm() {
                   cursor:  status === 'loading' ? 'not-allowed' : 'pointer',
                   fontSize: '0.9375rem',
                   fontWeight: 600,
-                  padding: '12px',
+                  paddingLeft: '12px',
+                  paddingRight: '12px',
                   margin: '12px'
                 }}
               >

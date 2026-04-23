@@ -1,4 +1,5 @@
 import { useRef, useMemo, useEffect, useState, useCallback } from "react";
+import { supabase } from "../../lib/supabase";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import { motion } from "framer-motion";
@@ -408,6 +409,16 @@ function GlitchText({ text }) {
 // ─────────────────────────────────────────────
 export default function HeroSection({ activeTheme = "cyber-blue", isDark = true }) {
   const colors = getColors(activeTheme);
+  const [cvUrl, setCvUrl] = useState('');
+
+  useEffect(() => {
+    supabase
+      .from('site_settings')
+      .select('value')
+      .eq('key', 'cv_url')
+      .single()
+      .then(({ data }) => { if (data?.value) setCvUrl(data.value); });
+  }, []);
 
   const typed = useTypewriter(
     ["Software Developer", "Full Stack Engineer", "Problem Solver", "Creative Technologist"],
@@ -587,34 +598,41 @@ export default function HeroSection({ activeTheme = "cyber-blue", isDark = true 
 
           {/* Download CV */}
           <a
-            href="#"
+            href={cvUrl || undefined}
+            download={cvUrl ? 'Jeme_Beseka_CV.pdf' : undefined}
+            target={cvUrl ? '_blank' : undefined}
+            rel={cvUrl ? 'noopener noreferrer' : undefined}
+            onClick={!cvUrl ? e => e.preventDefault() : undefined}
             style={{
               display: "inline-flex", alignItems: "center", gap: "0.5rem",
               padding: "0.75rem 1.75rem",
               borderRadius: "0.5rem",
               border: `1px solid ${glassBorder}`,
               background: glassBg,
-              color: textColor,
+              color: cvUrl ? textColor : 'rgba(255,255,255,0.3)',
               fontWeight: 600, fontSize: "0.95rem",
               fontFamily: "'Space Grotesk', sans-serif",
               textDecoration: "none",
               backdropFilter: "blur(12px)",
               WebkitBackdropFilter: "blur(12px)",
               transition: "all 0.2s ease",
+              cursor: cvUrl ? 'pointer' : 'default',
             }}
             onMouseEnter={e => {
+              if (!cvUrl) return;
               e.currentTarget.style.background = `${colors.accent}18`;
               e.currentTarget.style.borderColor = `${colors.accent}66`;
               e.currentTarget.style.transform = "translateY(-2px)";
             }}
             onMouseLeave={e => {
+              if (!cvUrl) return;
               e.currentTarget.style.background = glassBg;
               e.currentTarget.style.borderColor = glassBorder;
               e.currentTarget.style.transform = "translateY(0)";
             }}
           >
             <Download size={16} />
-            Download CV
+            {cvUrl ? 'Download CV' : 'CV Coming Soon'}
           </a>
         </motion.div>
       </motion.div>

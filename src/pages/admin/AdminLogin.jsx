@@ -2,24 +2,35 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Lock, Eye, EyeOff, Zap } from 'lucide-react';
+import { Lock, Eye, EyeOff, Zap, Mail } from 'lucide-react';
+import { supabase } from '../../lib/supabase';
 
 export default function AdminLogin() {
+  const [email,    setEmail]    = useState('');
   const [password, setPassword] = useState('');
   const [showPw,   setShowPw]   = useState(false);
   const [error,    setError]    = useState('');
+  const [loading,  setLoading]  = useState(false);
   const [shaking,  setShaking]  = useState(false);
   const navigate = useNavigate();
 
-  function handleLogin() {
-    const correct = import.meta.env.VITE_ADMIN_PASSWORD;
-    if (password === correct) {
-      sessionStorage.setItem('nf_admin_token', 'authenticated');
-      navigate('/admin/dashboard');
-    } else {
-      setError('Incorrect password. Access denied.');
+  async function handleLogin() {
+    if (!email || !password) {
+      setError('Email and password are required.');
       setShaking(true);
       setTimeout(() => setShaking(false), 600);
+      return;
+    }
+    setLoading(true);
+    setError('');
+    const { error: authError } = await supabase.auth.signInWithPassword({ email, password });
+    setLoading(false);
+    if (authError) {
+      setError('Invalid credentials. Access denied.');
+      setShaking(true);
+      setTimeout(() => setShaking(false), 600);
+    } else {
+      navigate('/admin/dashboard');
     }
   }
 
@@ -72,7 +83,7 @@ export default function AdminLogin() {
                 className="text-xl font-bold"
                 style={{ color: 'var(--mode-text)', fontFamily: 'Space Grotesk, sans-serif' }}
               >
-                Neural Forge
+               Jeme's Neural Forge
               </h1>
               <p className="text-xs mt-0.5" style={{ color: 'var(--mode-text-muted)' }}>
                 Admin Panel
@@ -83,37 +94,66 @@ export default function AdminLogin() {
           {/* Divider */}
           <div className="h-px" style={{ background: 'var(--color-border)' }} />
 
-          {/* Field */}
-          <div className="flex flex-col gap-2">
-            <label
-              className="text-xs font-semibold uppercase tracking-widest"
-              style={{ color: 'var(--mode-text-muted)', fontFamily: 'Space Grotesk, sans-serif' }}
-            >
-              Password
-            </label>
-            <div className="relative">
-              <div
-                className="absolute left-3 top-1/2 -translate-y-1/2"
-                style={{ color: 'var(--color-primary)', opacity: 0.7 }}
+          {/* Fields */}
+          <div className="flex flex-col gap-4">
+            {/* Email */}
+            <div className="flex flex-col gap-2">
+              <label
+                className="text-xs font-semibold uppercase tracking-widest"
+                style={{ color: 'var(--mode-text-muted)', fontFamily: 'Space Grotesk, sans-serif' }}
               >
-                <Lock size={15} />
+                Email
+              </label>
+              <div className="relative">
+                <div
+                  className="absolute left-3 top-1/2 -translate-y-1/2"
+                  style={{ color: 'var(--color-primary)', opacity: 0.7 }}
+                >
+                  <Mail size={15} />
+                </div>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={e => { setEmail(e.target.value); setError(''); }}
+                  onKeyDown={handleKeyDown}
+                  placeholder="admin@example.com"
+                  className="glass-input pl-9"
+                  autoFocus
+                />
               </div>
-              <input
-                type={showPw ? 'text' : 'password'}
-                value={password}
-                onChange={e => { setPassword(e.target.value); setError(''); }}
-                onKeyDown={handleKeyDown}
-                placeholder="Enter admin password"
-                className="glass-input pl-9 pr-10"
-                autoFocus
-              />
-              <button
-                onClick={() => setShowPw(p => !p)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 opacity-50 hover:opacity-100 transition-opacity"
-                style={{ color: 'var(--mode-text-muted)' }}
+            </div>
+
+            {/* Password */}
+            <div className="flex flex-col gap-2">
+              <label
+                className="text-xs font-semibold uppercase tracking-widest"
+                style={{ color: 'var(--mode-text-muted)', fontFamily: 'Space Grotesk, sans-serif' }}
               >
-                {showPw ? <EyeOff size={15} /> : <Eye size={15} />}
-              </button>
+                Password
+              </label>
+              <div className="relative">
+                <div
+                  className="absolute left-3 top-1/2 -translate-y-1/2"
+                  style={{ color: 'var(--color-primary)', opacity: 0.7 }}
+                >
+                  <Lock size={15} />
+                </div>
+                <input
+                  type={showPw ? 'text' : 'password'}
+                  value={password}
+                  onChange={e => { setPassword(e.target.value); setError(''); }}
+                  onKeyDown={handleKeyDown}
+                  placeholder="Enter admin password"
+                  className="glass-input pl-9 pr-10"
+                />
+                <button
+                  onClick={() => setShowPw(p => !p)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 opacity-50 hover:opacity-100 transition-opacity"
+                  style={{ color: 'var(--mode-text-muted)' }}
+                >
+                  {showPw ? <EyeOff size={15} /> : <Eye size={15} />}
+                </button>
+              </div>
             </div>
 
             <AnimatePresence>
@@ -134,12 +174,13 @@ export default function AdminLogin() {
           {/* Button */}
           <motion.button
             onClick={handleLogin}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.97 }}
+            disabled={loading}
+            whileHover={loading ? {} : { scale: 1.02 }}
+            whileTap={loading ? {} : { scale: 0.97 }}
             className="glass-button glass-button--primary w-full justify-center py-3 font-semibold"
-            style={{ fontSize: '0.9375rem' }}
+            style={{ fontSize: '0.9375rem', opacity: loading ? 0.7 : 1, cursor: loading ? 'not-allowed' : 'pointer' }}
           >
-            Access Dashboard
+            {loading ? 'Signing in…' : 'Access Dashboard'}
           </motion.button>
 
           <p

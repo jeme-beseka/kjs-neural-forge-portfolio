@@ -10,19 +10,6 @@ const Github = ({ size = 16, ...props }) => (
   </svg>
 );
 
-// ─────────────────────────────────────────────
-// Theme color map (mirrors HeroSection)
-// ─────────────────────────────────────────────
-const THEME_COLORS = {
-  "cyber-blue":    { primary: "#00D4FF", accent: "#7C3AED" },
-  "deep-space":    { primary: "#4D9FFF", accent: "#FF2D78" },
-  "arctic-neural": { primary: "#00B4D8", accent: "#90E0EF" },
-  "matrix-green":  { primary: "#00FF88", accent: "#00E5FF" },
-  "bio-circuit":   { primary: "#39FF14", accent: "#ADFF2F" },
-  "toxic-forge":   { primary: "#00FFC8", accent: "#7FFF00" },
-};
-
-const getColors = (theme) => THEME_COLORS[theme] || THEME_COLORS["cyber-blue"];
 
 // Tag badge color cycling
 const TAG_COLORS = [
@@ -94,7 +81,9 @@ function useTilt(strength = 12) {
 // ─────────────────────────────────────────────
 // Project image placeholder
 // ─────────────────────────────────────────────
-function ProjectImage({ project, colors, height = 200 }) {
+function ProjectImage({ project, height = 200 }) {
+  const primary = getComputedStyle(document.documentElement).getPropertyValue('--color-primary').trim();
+  const accent = getComputedStyle(document.documentElement).getPropertyValue('--color-accent').trim();
   const initials = project.title.split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
   if (project.image_url) {
     return (
@@ -109,19 +98,19 @@ function ProjectImage({ project, colors, height = 200 }) {
     <div style={{
       width: "100%", height,
       display: "flex", alignItems: "center", justifyContent: "center",
-      background: `linear-gradient(135deg, ${colors.primary}18, ${colors.accent}18)`,
+      background: `linear-gradient(135deg, ${primary}18, ${accent}18)`,
       position: "relative", overflow: "hidden",
     }}>
       {/* Grid pattern */}
       <div style={{
         position: "absolute", inset: 0,
-        backgroundImage: `linear-gradient(${colors.primary}22 1px, transparent 1px), linear-gradient(90deg, ${colors.primary}22 1px, transparent 1px)`,
+        backgroundImage: `linear-gradient(${primary}22 1px, transparent 1px), linear-gradient(90deg, ${primary}22 1px, transparent 1px)`,
         backgroundSize: "24px 24px",
       }} />
       <span style={{
         position: "relative",
         fontSize: "3rem", fontWeight: 900,
-        color: colors.primary, opacity: 0.5,
+        color: primary, opacity: 0.5,
         fontFamily: "'Space Grotesk', sans-serif",
         letterSpacing: "-0.04em",
       }}>
@@ -134,13 +123,14 @@ function ProjectImage({ project, colors, height = 200 }) {
 // ─────────────────────────────────────────────
 // Featured Card (large, 3D tilt)
 // ─────────────────────────────────────────────
-function FeaturedCard({ project, colors, isDark, onClick }) {
+function FeaturedCard({ project, onClick }) {
   const tilt = useTilt(8);
   const [hovered, setHovered] = useState(false);
-
-  const glassBg = isDark ? "rgba(255,255,255,0.04)" : "rgba(255,255,255,0.7)";
-  const textPrimary = isDark ? "#f1f5f9" : "#0f172a";
-  const textSecondary = isDark ? "#94a3b8" : "#475569";
+  const primary = getComputedStyle(document.documentElement).getPropertyValue('--color-primary').trim();
+  const accent = getComputedStyle(document.documentElement).getPropertyValue('--color-accent').trim();
+  const textPrimary = getComputedStyle(document.documentElement).getPropertyValue('--mode-text').trim();
+  const textSecondary = getComputedStyle(document.documentElement).getPropertyValue('--mode-text-muted').trim();
+  const glassBg = "rgba(255,255,255,0.04)";
 
   return (
     <motion.div
@@ -161,13 +151,13 @@ function FeaturedCard({ project, colors, isDark, onClick }) {
     >
       <div style={{
         borderRadius: "1rem",
-        border: `1px solid ${hovered ? colors.primary + "88" : colors.primary + "33"}`,
+        border: `1px solid ${hovered ? primary + "88" : primary + "33"}`,
         background: glassBg,
         backdropFilter: "blur(16px)",
         WebkitBackdropFilter: "blur(16px)",
         overflow: "hidden",
         boxShadow: hovered
-          ? `0 0 40px ${colors.primary}33, 0 20px 60px rgba(0,0,0,0.3)`
+          ? `0 0 40px ${primary}33, 0 20px 60px rgba(0,0,0,0.3)`
           : `0 0 0px transparent, 0 8px 32px rgba(0,0,0,0.2)`,
         transition: "border-color 0.3s, box-shadow 0.3s",
         display: "grid",
@@ -175,19 +165,19 @@ function FeaturedCard({ project, colors, isDark, onClick }) {
       }}>
         {/* Left: image */}
         <div style={{ position: "relative", minHeight: 280 }}>
-          <ProjectImage project={project} colors={colors} height={280} />
+          <ProjectImage project={project} height={280} />
           <div style={{
             position: "absolute", inset: 0,
-            background: `linear-gradient(to right, transparent 50%, ${isDark ? "#0a0a14" : "#f0f4ff"} 100%)`,
+            background: "linear-gradient(to right, transparent 50%, rgba(10,10,20,0.8) 100%)",
           }} />
           {/* Featured badge */}
           <div style={{
             position: "absolute", top: 12, left: 12,
             display: "inline-flex", alignItems: "center", gap: 6,
             padding: "4px 10px", borderRadius: 9999,
-            background: `${colors.primary}22`,
-            border: `1px solid ${colors.primary}55`,
-            color: colors.primary, fontSize: "0.7rem",
+            background: `${primary}22`,
+            border: `1px solid ${primary}55`,
+            color: primary, fontSize: "0.7rem",
             fontFamily: "monospace", letterSpacing: "0.1em", textTransform: "uppercase",
           }}>
             <Sparkles size={10} />
@@ -229,14 +219,14 @@ function FeaturedCard({ project, colors, isDark, onClick }) {
                 style={{
                   display: "inline-flex", alignItems: "center", gap: 6,
                   padding: "0.5rem 1.1rem", borderRadius: "0.4rem",
-                  background: `${colors.primary}18`,
-                  border: `1px solid ${colors.primary}55`,
-                  color: colors.primary, fontSize: "0.82rem", fontWeight: 600,
+                  background: `${primary}18`,
+                  border: `1px solid ${primary}55`,
+                  color: primary, fontSize: "0.82rem", fontWeight: 600,
                   textDecoration: "none", fontFamily: "'Space Grotesk', sans-serif",
                   transition: "all 0.2s",
                 }}
-                onMouseEnter={e => { e.currentTarget.style.background = `${colors.primary}30`; }}
-                onMouseLeave={e => { e.currentTarget.style.background = `${colors.primary}18`; }}
+                onMouseEnter={e => { e.currentTarget.style.background = `${primary}30`; }}
+                onMouseLeave={e => { e.currentTarget.style.background = `${primary}18`; }}
               >
                 <ExternalLink size={13} /> Live Demo
               </a>
@@ -250,14 +240,14 @@ function FeaturedCard({ project, colors, isDark, onClick }) {
                 style={{
                   display: "inline-flex", alignItems: "center", gap: 6,
                   padding: "0.5rem 1.1rem", borderRadius: "0.4rem",
-                  background: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.05)",
-                  border: `1px solid ${isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.12)"}`,
+                  background: "rgba(255,255,255,0.06)",
+                  border: "1px solid rgba(255,255,255,0.12)",
                   color: textPrimary, fontSize: "0.82rem", fontWeight: 600,
                   textDecoration: "none", fontFamily: "'Space Grotesk', sans-serif",
                   transition: "all 0.2s",
                 }}
-                onMouseEnter={e => { e.currentTarget.style.background = `${colors.accent}22`; }}
-                onMouseLeave={e => { e.currentTarget.style.background = isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.05)"; }}
+                onMouseEnter={e => { e.currentTarget.style.background = `${accent}22`; }}
+                onMouseLeave={e => { e.currentTarget.style.background = "rgba(255,255,255,0.06)"; }}
               >
                 <Github size={13} /> GitHub
               </a>
@@ -268,7 +258,7 @@ function FeaturedCard({ project, colors, isDark, onClick }) {
                 display: "inline-flex", alignItems: "center", gap: 4,
                 padding: "0.5rem 1rem", borderRadius: "0.4rem",
                 background: "transparent", border: "none",
-                color: colors.primary, fontSize: "0.82rem", fontWeight: 600,
+                color: primary, fontSize: "0.82rem", fontWeight: 600,
                 cursor: "pointer", fontFamily: "'Space Grotesk', sans-serif",
               }}
             >
@@ -284,11 +274,13 @@ function FeaturedCard({ project, colors, isDark, onClick }) {
 // ─────────────────────────────────────────────
 // Regular Project Card
 // ─────────────────────────────────────────────
-function ProjectCard({ project, colors, isDark, onClick, index }) {
+function ProjectCard({ project, onClick, index }) {
   const [hovered, setHovered] = useState(false);
-  const glassBg = isDark ? "rgba(255,255,255,0.04)" : "rgba(255,255,255,0.7)";
-  const textPrimary = isDark ? "#f1f5f9" : "#0f172a";
-  const textSecondary = isDark ? "#94a3b8" : "#475569";
+  const primary = getComputedStyle(document.documentElement).getPropertyValue('--color-primary').trim();
+  const accent = getComputedStyle(document.documentElement).getPropertyValue('--color-accent').trim();
+  const textPrimary = getComputedStyle(document.documentElement).getPropertyValue('--mode-text').trim();
+  const textSecondary = getComputedStyle(document.documentElement).getPropertyValue('--mode-text-muted').trim();
+  const glassBg = "rgba(255,255,255,0.04)";
   const isUpcoming = project.status === "upcoming";
 
   return (
@@ -303,13 +295,13 @@ function ProjectCard({ project, colors, isDark, onClick, index }) {
       onClick={() => onClick(project)}
       style={{
         borderRadius: "0.875rem",
-        border: `1px solid ${hovered ? colors.primary + "66" : isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.09)"}`,
+        border: `1px solid ${hovered ? primary + "66" : "rgba(255,255,255,0.08)"}`,
         background: glassBg,
         backdropFilter: "blur(14px)",
         WebkitBackdropFilter: "blur(14px)",
         overflow: "hidden",
         cursor: "pointer",
-        boxShadow: hovered ? `0 0 28px ${colors.primary}28, 0 12px 40px rgba(0,0,0,0.25)` : "0 4px 20px rgba(0,0,0,0.15)",
+        boxShadow: hovered ? `0 0 28px ${primary}28, 0 12px 40px rgba(0,0,0,0.25)` : "0 4px 20px rgba(0,0,0,0.15)",
         transition: "border-color 0.25s, box-shadow 0.25s",
         display: "flex", flexDirection: "column",
         position: "relative",
@@ -317,11 +309,11 @@ function ProjectCard({ project, colors, isDark, onClick, index }) {
     >
       {/* Image area */}
       <div style={{ position: "relative" }}>
-        <ProjectImage project={project} colors={colors} height={180} />
+        <ProjectImage project={project} height={180} />
         {/* Gradient overlay */}
         <div style={{
           position: "absolute", inset: 0,
-          background: `linear-gradient(to bottom, transparent 40%, ${isDark ? "rgba(10,10,20,0.85)" : "rgba(240,244,255,0.85)"} 100%)`,
+          background: "linear-gradient(to bottom, transparent 40%, rgba(10,10,20,0.85) 100%)",
         }} />
         {/* Upcoming overlay */}
         {isUpcoming && (
@@ -331,16 +323,16 @@ function ProjectCard({ project, colors, isDark, onClick, index }) {
             background: "rgba(10,10,20,0.6)", backdropFilter: "blur(4px)",
             gap: "0.5rem",
           }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, color: colors.primary }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, color: primary }}>
               <span style={{
                 width: 8, height: 8, borderRadius: "50%",
-                background: colors.primary, animation: "pulse-dot 1.5s infinite",
+                background: primary, animation: "pulse-dot 1.5s infinite",
               }} />
               <span style={{ fontWeight: 700, fontSize: "0.9rem", fontFamily: "'Space Grotesk', sans-serif" }}>
                 Coming Soon
               </span>
             </div>
-            <Clock size={18} style={{ color: colors.primary, opacity: 0.6 }} />
+            <Clock size={18} style={{ color: primary, opacity: 0.6 }} />
           </div>
         )}
       </div>
@@ -393,13 +385,13 @@ function ProjectCard({ project, colors, isDark, onClick, index }) {
               style={{
                 display: "inline-flex", alignItems: "center", gap: 5,
                 padding: "0.4rem 0.85rem", borderRadius: "0.35rem",
-                background: `${colors.primary}16`, border: `1px solid ${colors.primary}44`,
-                color: colors.primary, fontSize: "0.76rem", fontWeight: 600,
+                background: `${primary}16`, border: `1px solid ${primary}44`,
+                color: primary, fontSize: "0.76rem", fontWeight: 600,
                 textDecoration: "none", fontFamily: "'Space Grotesk', sans-serif",
                 transition: "background 0.2s",
               }}
-              onMouseEnter={e => { e.currentTarget.style.background = `${colors.primary}28`; }}
-              onMouseLeave={e => { e.currentTarget.style.background = `${colors.primary}16`; }}
+              onMouseEnter={e => { e.currentTarget.style.background = `${primary}28`; }}
+              onMouseLeave={e => { e.currentTarget.style.background = `${primary}16`; }}
             >
               <ExternalLink size={11} /> Demo
             </a>
@@ -413,14 +405,14 @@ function ProjectCard({ project, colors, isDark, onClick, index }) {
               style={{
                 display: "inline-flex", alignItems: "center", gap: 5,
                 padding: "0.4rem 0.85rem", borderRadius: "0.35rem",
-                background: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)",
-                border: `1px solid ${isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)"}`,
+                background: "rgba(255,255,255,0.05)",
+                border: "1px solid rgba(255,255,255,0.1)",
                 color: textPrimary, fontSize: "0.76rem", fontWeight: 600,
                 textDecoration: "none", fontFamily: "'Space Grotesk', sans-serif",
                 transition: "background 0.2s",
               }}
-              onMouseEnter={e => { e.currentTarget.style.background = `${colors.accent}1A`; }}
-              onMouseLeave={e => { e.currentTarget.style.background = isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)"; }}
+              onMouseEnter={e => { e.currentTarget.style.background = `${accent}1A`; }}
+              onMouseLeave={e => { e.currentTarget.style.background = "rgba(255,255,255,0.05)"; }}
             >
               <Github size={11} /> GitHub
             </a>
@@ -434,11 +426,13 @@ function ProjectCard({ project, colors, isDark, onClick, index }) {
 // ─────────────────────────────────────────────
 // Project Detail Modal
 // ─────────────────────────────────────────────
-function ProjectModal({ project, colors, isDark, onClose }) {
-  const textPrimary = isDark ? "#f1f5f9" : "#0f172a";
-  const textSecondary = isDark ? "#94a3b8" : "#475569";
-  const modalBg = isDark ? "rgba(10,10,20,0.95)" : "rgba(248,250,252,0.97)";
-  const borderColor = isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)";
+function ProjectModal({ project, onClose }) {
+  const primary = getComputedStyle(document.documentElement).getPropertyValue('--color-primary').trim();
+  const accent = getComputedStyle(document.documentElement).getPropertyValue('--color-accent').trim();
+  const textPrimary = getComputedStyle(document.documentElement).getPropertyValue('--mode-text').trim();
+  const textSecondary = getComputedStyle(document.documentElement).getPropertyValue('--mode-text-muted').trim();
+  const modalBg = "rgba(10,10,20,0.95)";
+  const borderColor = "rgba(255,255,255,0.1)";
 
   // Close on Escape
   useEffect(() => {
@@ -478,17 +472,17 @@ function ProjectModal({ project, colors, isDark, onClose }) {
           width: "100%", maxWidth: 720,
           maxHeight: "90vh", overflowY: "auto",
           borderRadius: "1.25rem",
-          border: `1px solid ${colors.primary}44`,
+          border: `1px solid ${primary}44`,
           background: modalBg,
-          boxShadow: `0 0 60px ${colors.primary}22, 0 30px 80px rgba(0,0,0,0.5)`,
+          boxShadow: `0 0 60px ${primary}22, 0 30px 80px rgba(0,0,0,0.5)`,
         }}
       >
         {/* Image */}
         <div style={{ position: "relative" }}>
-          <ProjectImage project={project} colors={colors} height={260} />
+          <ProjectImage project={project} height={260} />
           <div style={{
             position: "absolute", inset: 0,
-            background: `linear-gradient(to bottom, transparent 50%, ${isDark ? "rgba(10,10,20,1)" : "rgba(248,250,252,1)"} 100%)`,
+            background: "linear-gradient(to bottom, transparent 50%, rgba(10,10,20,1) 100%)",
           }} />
           {/* Close button */}
           <button
@@ -497,11 +491,11 @@ function ProjectModal({ project, colors, isDark, onClose }) {
               position: "absolute", top: 16, right: 16,
               width: 36, height: 36, borderRadius: "50%",
               display: "flex", alignItems: "center", justifyContent: "center",
-              background: "rgba(0,0,0,0.5)", border: `1px solid rgba(255,255,255,0.2)`,
+              background: "rgba(0,0,0,0.5)", border: "1px solid rgba(255,255,255,0.2)",
               color: "#fff", cursor: "pointer", backdropFilter: "blur(8px)",
               transition: "background 0.2s",
             }}
-            onMouseEnter={e => { e.currentTarget.style.background = `${colors.primary}55`; }}
+            onMouseEnter={e => { e.currentTarget.style.background = `${primary}55`; }}
             onMouseLeave={e => { e.currentTarget.style.background = "rgba(0,0,0,0.5)"; }}
           >
             <X size={16} />
@@ -516,9 +510,9 @@ function ProjectModal({ project, colors, isDark, onClose }) {
               display: "inline-flex", alignItems: "center", gap: 6,
               padding: "4px 12px", borderRadius: 9999, fontSize: "0.72rem",
               fontFamily: "monospace", textTransform: "uppercase", letterSpacing: "0.12em",
-              background: project.status === "upcoming" ? `${colors.accent}18` : `${colors.primary}18`,
-              border: `1px solid ${project.status === "upcoming" ? colors.accent + "44" : colors.primary + "44"}`,
-              color: project.status === "upcoming" ? colors.accent : colors.primary,
+              background: project.status === "upcoming" ? `${accent}18` : `${primary}18`,
+              border: `1px solid ${project.status === "upcoming" ? accent + "44" : primary + "44"}`,
+              color: project.status === "upcoming" ? accent : primary,
             }}>
               {project.status === "upcoming" ? <Clock size={10} /> : <Sparkles size={10} />}
               {project.status === "upcoming" ? "Upcoming" : "Completed"}
@@ -569,15 +563,15 @@ function ProjectModal({ project, colors, isDark, onClose }) {
                 style={{
                   display: "inline-flex", alignItems: "center", gap: 8,
                   padding: "0.65rem 1.4rem", borderRadius: "0.5rem",
-                  background: `${colors.primary}20`,
-                  border: `1px solid ${colors.primary}55`,
-                  color: colors.primary, fontSize: "0.88rem", fontWeight: 600,
+                  background: `${primary}20`,
+                  border: `1px solid ${primary}55`,
+                  color: primary, fontSize: "0.88rem", fontWeight: 600,
                   textDecoration: "none", fontFamily: "'Space Grotesk', sans-serif",
                   transition: "all 0.2s",
-                  boxShadow: `0 0 16px ${colors.primary}22`,
+                  boxShadow: `0 0 16px ${primary}22`,
                 }}
-                onMouseEnter={e => { e.currentTarget.style.background = `${colors.primary}35`; e.currentTarget.style.boxShadow = `0 0 28px ${colors.primary}44`; }}
-                onMouseLeave={e => { e.currentTarget.style.background = `${colors.primary}20`; e.currentTarget.style.boxShadow = `0 0 16px ${colors.primary}22`; }}
+                onMouseEnter={e => { e.currentTarget.style.background = `${primary}35`; e.currentTarget.style.boxShadow = `0 0 28px ${primary}44`; }}
+                onMouseLeave={e => { e.currentTarget.style.background = `${primary}20`; e.currentTarget.style.boxShadow = `0 0 16px ${primary}22`; }}
               >
                 <ExternalLink size={15} /> View Live Demo
               </a>
@@ -590,14 +584,14 @@ function ProjectModal({ project, colors, isDark, onClose }) {
                 style={{
                   display: "inline-flex", alignItems: "center", gap: 8,
                   padding: "0.65rem 1.4rem", borderRadius: "0.5rem",
-                  background: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.05)",
+                  background: "rgba(255,255,255,0.06)",
                   border: `1px solid ${borderColor}`,
                   color: textPrimary, fontSize: "0.88rem", fontWeight: 600,
                   textDecoration: "none", fontFamily: "'Space Grotesk', sans-serif",
                   transition: "all 0.2s",
                 }}
-                onMouseEnter={e => { e.currentTarget.style.background = `${colors.accent}22`; }}
-                onMouseLeave={e => { e.currentTarget.style.background = isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.05)"; }}
+                onMouseEnter={e => { e.currentTarget.style.background = `${accent}22`; }}
+                onMouseLeave={e => { e.currentTarget.style.background = "rgba(255,255,255,0.06)"; }}
               >
                 <Github size={15} /> View on GitHub
               </a>
@@ -612,12 +606,12 @@ function ProjectModal({ project, colors, isDark, onClose }) {
 // ─────────────────────────────────────────────
 // Skeleton loader
 // ─────────────────────────────────────────────
-function SkeletonCard({ isDark }) {
-  const bg = isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.04)";
-  const shimmer = isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.07)";
+function SkeletonCard() {
+  const bg = "rgba(255,255,255,0.04)";
+  const shimmer = "rgba(255,255,255,0.07)";
   return (
     <div style={{
-      borderRadius: "0.875rem", border: `1px solid ${isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.07)"}`,
+      borderRadius: "0.875rem", border: "1px solid rgba(255,255,255,0.07)",
       background: bg, overflow: "hidden",
     }}>
       <div style={{ height: 180, background: shimmer, animation: "shimmer 1.5s infinite" }} />
@@ -640,13 +634,14 @@ function SkeletonCard({ isDark }) {
 // ─────────────────────────────────────────────
 const TABS = ["All", "Completed", "Upcoming"];
 
-function FilterTabs({ active, onChange, colors, isDark }) {
-  const textColor = isDark ? "#94a3b8" : "#64748b";
+function FilterTabs({ active, onChange }) {
+  const primary = getComputedStyle(document.documentElement).getPropertyValue('--color-primary').trim();
+  const textColor = "#94a3b8";
   return (
     <div style={{
       display: "inline-flex", alignItems: "center",
-      background: isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.04)",
-      border: `1px solid ${isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}`,
+      background: "rgba(255,255,255,0.04)",
+      border: "1px solid rgba(255,255,255,0.08)",
       borderRadius: "0.75rem", padding: "0.3rem", gap: "0.15rem",
       backdropFilter: "blur(10px)",
     }}>
@@ -659,7 +654,7 @@ function FilterTabs({ active, onChange, colors, isDark }) {
             borderRadius: "0.5rem", border: "none", background: "transparent",
             cursor: "pointer", fontSize: "0.85rem", fontWeight: 600,
             fontFamily: "'Space Grotesk', sans-serif",
-            color: active === tab ? colors.primary : textColor,
+            color: active === tab ? primary : textColor,
             transition: "color 0.2s",
             zIndex: 1,
           }}
@@ -669,8 +664,8 @@ function FilterTabs({ active, onChange, colors, isDark }) {
               layoutId="tab-pill"
               style={{
                 position: "absolute", inset: 0, borderRadius: "0.5rem",
-                background: `${colors.primary}18`,
-                border: `1px solid ${colors.primary}44`,
+                background: `${primary}18`,
+                border: `1px solid ${primary}44`,
                 zIndex: -1,
               }}
               transition={{ type: "spring", stiffness: 380, damping: 30 }}
@@ -686,15 +681,15 @@ function FilterTabs({ active, onChange, colors, isDark }) {
 // ─────────────────────────────────────────────
 // Main ProjectsSection
 // ─────────────────────────────────────────────
-export default function ProjectsSection({ activeTheme = "cyber-blue", isDark = true }) {
-  const colors = getColors(activeTheme);
+export default function ProjectsSection() {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("All");
   const [selectedProject, setSelectedProject] = useState(null);
 
-  const textPrimary = isDark ? "#f1f5f9" : "#0f172a";
-  const textSecondary = isDark ? "#64748b" : "#64748b";
+  const textPrimary = getComputedStyle(document.documentElement).getPropertyValue('--mode-text').trim();
+  const textSecondary = "#64748b";
+  const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--color-primary').trim();
 
   // Fetch from Supabase, fall back to seed data
   useEffect(() => {
@@ -744,7 +739,7 @@ export default function ProjectsSection({ activeTheme = "cyber-blue", isDark = t
             display: "inline-block", marginBottom: "0.75rem",
             fontSize: "0.72rem", fontFamily: "monospace",
             letterSpacing: "0.25em", textTransform: "uppercase",
-            color: colors.primary,
+            color: primaryColor,
           }}>
             // my work
           </span>
@@ -760,17 +755,17 @@ export default function ProjectsSection({ activeTheme = "cyber-blue", isDark = t
           </p>
 
           {/* Filter tabs */}
-          <FilterTabs active={activeTab} onChange={setActiveTab} colors={colors} isDark={isDark} />
+          <FilterTabs active={activeTab} onChange={setActiveTab} />
         </motion.div>
 
         {/* Loading state */}
         {loading && (
           <div>
             <div style={{ display: "grid", gap: "1.5rem", marginBottom: "2rem" }}>
-              <SkeletonCard isDark={isDark} />
+              <SkeletonCard />
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "1.25rem" }}>
-              {[0, 1, 2].map(i => <SkeletonCard key={i} isDark={isDark} />)}
+              {[0, 1, 2].map(i => <SkeletonCard key={i} />)}
             </div>
           </div>
         )}
@@ -808,8 +803,6 @@ export default function ProjectsSection({ activeTheme = "cyber-blue", isDark = t
                   <div className="featured-card-wrapper">
                     <FeaturedCard
                       project={project}
-                      colors={colors}
-                      isDark={isDark}
                       onClick={setSelectedProject}
                     />
                   </div>
@@ -826,11 +819,11 @@ export default function ProjectsSection({ activeTheme = "cyber-blue", isDark = t
               <div style={{
                 display: "flex", alignItems: "center", gap: "1rem", marginBottom: "1.5rem",
               }}>
-                <div style={{ flex: 1, height: 1, background: isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.07)" }} />
+                <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.07)" }} />
                 <span style={{ fontSize: "0.75rem", color: textSecondary, fontFamily: "monospace", letterSpacing: "0.1em", textTransform: "uppercase" }}>
                   More Projects
                 </span>
-                <div style={{ flex: 1, height: 1, background: isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.07)" }} />
+                <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.07)" }} />
               </div>
             )}
             <motion.div
@@ -853,8 +846,6 @@ export default function ProjectsSection({ activeTheme = "cyber-blue", isDark = t
                   >
                     <ProjectCard
                       project={project}
-                      colors={colors}
-                      isDark={isDark}
                       onClick={setSelectedProject}
                       index={i}
                     />
@@ -871,8 +862,6 @@ export default function ProjectsSection({ activeTheme = "cyber-blue", isDark = t
         {selectedProject && (
           <ProjectModal
             project={selectedProject}
-            colors={colors}
-            isDark={isDark}
             onClose={() => setSelectedProject(null)}
           />
         )}

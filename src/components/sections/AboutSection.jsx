@@ -1,5 +1,5 @@
 // src/sections/AboutSection.jsx
-import { useRef, useCallback } from 'react';
+import { useRef, useCallback, useState, useEffect } from 'react';
 import {
   motion,
   useMotionValue,
@@ -8,44 +8,37 @@ import {
   useInView,
 } from 'framer-motion';
 import {
-  Globe,
-  MonitorCheck,
-  BarChart3,
-  Plug2,
+  Globe, MonitorCheck, BarChart3, Plug2,
+  Monitor, BarChart2, Plug, Code, Cpu, Database, Layers, Smartphone, Server,
 } from 'lucide-react';
+import { supabase } from '../../lib/supabase';
 
 /* ─────────────────────────────────────────────────────────────────────────────
-   WHAT I DO — cards
+   ICON MAP + FALLBACK CONTENT
    ─────────────────────────────────────────────────────────────────────────── */
 
-const SERVICES = [
-  {
-    Icon: Globe,
-    title: 'Web Development',
-    desc: 'Crafting fast, accessible web apps end-to-end.',
-  },
-  {
-    Icon: MonitorCheck,
-    title: 'Desktop Apps',
-    desc: 'High performance Desktop applications using native Java',
-  },
-  {
-    Icon: BarChart3,
-    title: 'Data Visualization',
-    desc: 'Turning raw numbers into insightful, interactive charts.',
-  },
-  {
-    Icon: Plug2,
-    title: 'API Integration',
-    desc: 'Bridging services with robust REST layers.',
-  },
-];
+const ICON_MAP = {
+  Globe, MonitorCheck, Monitor, BarChart3, BarChart2, Plug2, Plug,
+  Code, Cpu, Database, Layers, Smartphone, Server,
+};
+
+const FALLBACK = {
+  about_name:    'Jeme Beseka',
+  about_moniker: '<FullStack Developer />',
+  about_status:  'Available for hire',
+  about_bio_1:   "Hey — I'm Jeme Beseka, a full-stack developer based in Cameroon, passionate about turning complex problems into clean, intuitive digital experiences. I thrive at the intersection of design and engineering.",
+  about_bio_2:   'With a focus on the Cameroonian tech ecosystem, I build scalable platforms — from multi-vendor marketplaces to data pipelines — always with an eye on performance, accessibility, and pixel-perfect craft.',
+  about_card_1_icon: 'Globe',        about_card_1_title: 'Web Development',    about_card_1_desc: 'Crafting fast, accessible web apps end-to-end.',
+  about_card_2_icon: 'MonitorCheck', about_card_2_title: 'Desktop Apps',       about_card_2_desc: 'High performance Desktop applications using native Java',
+  about_card_3_icon: 'BarChart3',    about_card_3_title: 'Data Visualization', about_card_3_desc: 'Turning raw numbers into insightful, interactive charts.',
+  about_card_4_icon: 'Plug2',        about_card_4_title: 'API Integration',    about_card_4_desc: 'Bridging services with robust REST layers.',
+};
 
 /* ─────────────────────────────────────────────────────────────────────────────
    PROFILE CARD — hex pattern placeholder + 3-D tilt
    ─────────────────────────────────────────────────────────────────────────── */
 
-function ProfileCard() {
+function ProfileCard({ imageUrl, name, moniker, status }) {
   const cardRef = useRef(null);
 
   const rawX = useMotionValue(0);
@@ -154,7 +147,7 @@ function ProfileCard() {
           }}
         />
 
-        {/* Avatar placeholder */}
+        {/* Avatar */}
         <div
           style={{
             position: 'relative',
@@ -167,16 +160,20 @@ function ProfileCard() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
+            overflow: 'hidden',
           }}
         >
-          {/* Silhouette SVG */}
-          <svg viewBox="0 0 80 80" width="68" height="68" fill="none">
-            <circle cx="40" cy="28" r="16" fill="rgba(var(--color-primary-rgb), 0.45)" />
-            <path
-              d="M10 68c0-16.569 13.431-30 30-30s30 13.431 30 30"
-              fill="rgba(var(--color-primary-rgb), 0.45)"
-            />
-          </svg>
+          {imageUrl ? (
+            <img src={imageUrl} alt={name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          ) : (
+            <svg viewBox="0 0 80 80" width="68" height="68" fill="none">
+              <circle cx="40" cy="28" r="16" fill="rgba(var(--color-primary-rgb), 0.45)" />
+              <path
+                d="M10 68c0-16.569 13.431-30 30-30s30 13.431 30 30"
+                fill="rgba(var(--color-primary-rgb), 0.45)"
+              />
+            </svg>
+          )}
         </div>
 
         {/* Name + moniker */}
@@ -192,7 +189,7 @@ function ProfileCard() {
               letterSpacing: '0.04em',
             }}
           >
-            Jeme Beseka
+            {name}
           </p>
           <p
             style={{
@@ -203,7 +200,7 @@ function ProfileCard() {
               letterSpacing: '0.12em',
             }}
           >
-            {'<FullStack Developer />'}
+            {moniker}
           </p>
         </div>
 
@@ -234,7 +231,7 @@ function ProfileCard() {
               boxShadow: '0 0 6px var(--color-glow)',
             }}
           />
-          Available for hire
+          {status}
         </div>
       </div>
 
@@ -393,7 +390,36 @@ function SectionHeading({ label, title }) {
    ABOUT SECTION
    ─────────────────────────────────────────────────────────────────────────── */
 
+function renderBio1(text, boldName) {
+  if (!boldName || !text) return text;
+  const idx = text.indexOf(boldName);
+  if (idx === -1) return text;
+  return (
+    <>
+      {text.slice(0, idx)}
+      <strong style={{ color: 'var(--color-primary)' }}>{boldName}</strong>
+      {text.slice(idx + boldName.length)}
+    </>
+  );
+}
+
 export default function AboutSection() {
+  const [content, setContent] = useState(FALLBACK);
+
+  useEffect(() => {
+    supabase
+      .from('site_content')
+      .select('key, value')
+      .then(({ data }) => {
+        if (!data?.length) return;
+        const map = { ...FALLBACK };
+        data.forEach(r => { if (r.key.startsWith('about_')) map[r.key] = r.value || map[r.key]; });
+        setContent(map);
+      });
+  }, []);
+
+  const c = content;
+
   return (
     <section
       id="about"
@@ -461,7 +487,12 @@ export default function AboutSection() {
               justifyContent: 'center',
             }}
           >
-            <ProfileCard />
+            <ProfileCard
+              imageUrl={c.about_image_url}
+              name={c.about_name}
+              moniker={c.about_moniker}
+              status={c.about_status}
+            />
           </motion.div>
 
           {/* ── Right: Bio + service cards ─────────────────────────── */}
@@ -482,11 +513,7 @@ export default function AboutSection() {
                   fontFamily: "'Space Grotesk', sans-serif",
                 }}
               >
-                Hey — I'm{' '}
-                <strong style={{ color: 'var(--color-primary)' }}>Jeme Beseka</strong>, a
-                full-stack developer based in Cameroon, passionate about turning complex
-                problems into clean, intuitive digital experiences. I thrive at the
-                intersection of design and engineering.
+                {renderBio1(c.about_bio_1, c.about_name)}
               </p>
               <p
                 style={{
@@ -497,9 +524,7 @@ export default function AboutSection() {
                   fontFamily: "'Space Grotesk', sans-serif",
                 }}
               >
-                With a focus on the Cameroonian tech ecosystem, I build scalable platforms
-                — from multi-vendor marketplaces to data pipelines — always with an eye
-                on performance, accessibility, and pixel-perfect craft.
+                {c.about_bio_2}
               </p>
             </div>
 
@@ -526,13 +551,18 @@ export default function AboutSection() {
                 gap: '14px',
               }}
             >
-              {SERVICES.map((s, i) => (
-                <ServiceCard
-                  key={s.title}
-                  {...s}
-                  delay={0.15 + i * 0.08}
-                />
-              ))}
+              {[1, 2, 3, 4].map((n, i) => {
+                const Icon = ICON_MAP[c[`about_card_${n}_icon`]] || Globe;
+                return (
+                  <ServiceCard
+                    key={n}
+                    Icon={Icon}
+                    title={c[`about_card_${n}_title`]}
+                    desc={c[`about_card_${n}_desc`]}
+                    delay={0.15 + i * 0.08}
+                  />
+                );
+              })}
             </div>
           </motion.div>
         </div>

@@ -331,8 +331,19 @@ function buildRenderers(colors, isDark) {
         </div>
       </blockquote>
     ),
-    code: ({ inline, children }) => {
-      if (inline) {
+    pre: ({ children }) => (
+      <pre style={{
+        background: codeBlockBg, borderRadius: "0.625rem", padding: "1.25rem 1.5rem",
+        overflowX: "auto", margin: "1.5rem 0",
+        border: `1px solid ${isDark ? colors.primary + "22" : "rgba(0,0,0,0.1)"}`,
+        boxShadow: isDark ? `0 0 20px ${colors.primary}0a` : "0 2px 12px rgba(0,0,0,0.08)",
+      }}>
+        {children}
+      </pre>
+    ),
+    code: ({ className, children }) => {
+      const isInline = !className && !String(children).includes("\n");
+      if (isInline) {
         return (
           <code style={{
             fontFamily: "'Fira Code', 'Courier New', monospace",
@@ -346,20 +357,13 @@ function buildRenderers(colors, isDark) {
         );
       }
       return (
-        <pre style={{
-          background: codeBlockBg, borderRadius: "0.625rem", padding: "1.25rem 1.5rem",
-          overflowX: "auto", margin: "1.5rem 0",
-          border: `1px solid ${isDark ? colors.primary + "22" : "rgba(0,0,0,0.1)"}`,
-          boxShadow: isDark ? `0 0 20px ${colors.primary}0a` : "0 2px 12px rgba(0,0,0,0.08)",
-        }}>
-          <code style={{
-            fontFamily: "'Fira Code', 'Courier New', monospace",
-            fontSize: "0.85rem", lineHeight: 1.75,
-            color: isDark ? "#e2e8f0" : "#1e293b",
-          }}>
-            {children}
-          </code>
-        </pre>
+        <code style={{
+          fontFamily: "'Fira Code', 'Courier New', monospace",
+          fontSize: "0.85rem", lineHeight: 1.75,
+          color: isDark ? "#e2e8f0" : "#1e293b",
+        }} className={className}>
+          {children}
+        </code>
       );
     },
     ul: ({ children }) => (

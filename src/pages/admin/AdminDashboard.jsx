@@ -308,6 +308,71 @@ function ActionButtons({ onEdit, onDelete }) {
   );
 }
 
+/* Image upload — uploads to Supabase Storage 'images' bucket */
+function ImageUpload({ value, onChange, shape, toast }) {
+  const [uploading, setUploading] = useState(false);
+  const fileRef = useRef(null);
+
+  async function handleFile(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      toast?.show('Please select an image file.', 'error'); return;
+    }
+    setUploading(true);
+    const ext = file.name.split('.').pop();
+    const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+    const { error: upErr } = await supabase.storage.from('images').upload(path, file, { upsert: true });
+    if (upErr) { toast?.show(upErr.message, 'error'); setUploading(false); return; }
+    const { data: urlData } = supabase.storage.from('images').getPublicUrl(path);
+    onChange(urlData.publicUrl);
+    setUploading(false);
+    e.target.value = '';
+  }
+
+  const isCircle = shape === 'circle';
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      {value && (
+        <img
+          src={value}
+          alt="Preview"
+          style={{
+            objectFit: 'cover',
+            border: '1px solid var(--color-border)',
+            ...(isCircle
+              ? { width: 80, height: 80, borderRadius: '50%' }
+              : { width: '100%', maxHeight: 160, borderRadius: 8 }),
+          }}
+          onError={e => { e.target.style.display = 'none'; }}
+        />
+      )}
+      <div className="flex gap-2 items-center flex-wrap">
+        <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleFile} />
+        <button
+          type="button"
+          onClick={() => fileRef.current?.click()}
+          disabled={uploading}
+          className="glass-button flex items-center gap-2 px-3 py-2 text-sm"
+        >
+          {uploading ? <Spinner size={13} /> : <FileUp size={13} />}
+          {uploading ? 'Uploading…' : value ? 'Replace Image' : 'Upload Image'}
+        </button>
+        {value && (
+          <button
+            type="button"
+            onClick={() => onChange('')}
+            className="glass-button flex items-center gap-2 px-3 py-2 text-sm"
+            style={{ color: '#ef4444' }}
+          >
+            <X size={13} /> Remove
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
 /* Table wrapper */
 function Table({ headers, children, loading, empty }) {
   return (
@@ -455,7 +520,9 @@ function ProjectsTab({ toast }) {
             <Field label="Live URL"><Input value={form.live_url} onChange={set('live_url')} placeholder="https://..." /></Field>
             <Field label="GitHub URL"><Input value={form.github_url} onChange={set('github_url')} placeholder="https://github.com/..." /></Field>
           </div>
-          <Field label="Image URL"><Input value={form.image_url} onChange={set('image_url')} placeholder="https://..." /></Field>
+          <Field label="Image">
+            <ImageUpload value={form.image_url} onChange={set('image_url')} toast={toast} />
+          </Field>
           <div className="grid grid-cols-2 gap-4">
             <Field label="Status">
               <select
@@ -578,7 +645,9 @@ function BlogTab({ toast }) {
         <div className="flex flex-col gap-4">
           <Field label="Title"><Input value={form.title} onChange={set('title')} placeholder="Post title" /></Field>
           <Field label="Excerpt"><Textarea value={form.excerpt} onChange={set('excerpt')} placeholder="Short excerpt shown on blog list" rows={2} /></Field>
-          <Field label="Cover Image URL"><Input value={form.cover_image} onChange={set('cover_image')} placeholder="https://..." /></Field>
+          <Field label="Cover Image">
+            <ImageUpload value={form.cover_image} onChange={set('cover_image')} toast={toast} />
+          </Field>
 
           {/* Type toggle */}
           <Field label="Type">
@@ -1099,28 +1168,34 @@ function AboutTab({ toast }) {
       {/* Profile */}
       <div className="glass-card p-5 flex flex-col gap-4">
         <h3 className="text-sm font-semibold uppercase tracking-wider" style={{ color: 'var(--color-primary)', fontFamily: 'Space Grotesk,sans-serif' }}>Profile</h3>
-        <Field label="Profile Image URL">
-          <div className="flex gap-3 items-start">
-            <div className="flex-1">
-              <Input value={content['about_image_url']} onChange={set('about_image_url')} placeholder="https://your-image-url.com/photo.jpg" />
-            </div>
-            {content['about_image_url'] && (
-              <img
-                src={content['about_image_url']}
-                alt="Preview"
-                className="w-14 h-14 rounded-xl object-cover flex-shrink-0"
-                style={{ border: '1px solid var(--color-border)' }}
-                onError={e => { e.target.style.display = 'none'; }}
-              />
-            )}
-          </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field label="Name">
+            <Input value={content['about_name']} onChange={set('about_name')} placeholder="Jeme Beseka" />
+          </Field>
+          <Field label="Moniker (code tag below name)">
+            <Input value={content['about_moniker']} onChange={set('about_moniker')} placeholder="<FullStack Developer />" />
+          </Field>
+        </div>
+        <Field label="Status Pill Text">
+          <Input value={content['about_status']} onChange={set('about_status')} placeholder="Available for hire" />
         </Field>
-        <Field label="Bio Text">
+        <Field label="Profile Image">
+          <ImageUpload value={content['about_image_url']} onChange={set('about_image_url')} shape="circle" toast={toast} />
+        </Field>
+        <Field label="Bio — primary paragraph (your name will appear bold automatically)">
           <Textarea
-            value={content['about_bio']}
-            onChange={set('about_bio')}
-            placeholder="Write your bio here..."
-            rows={5}
+            value={content['about_bio_1']}
+            onChange={set('about_bio_1')}
+            placeholder="Hey — I'm Jeme Beseka, a full-stack developer based in Cameroon..."
+            rows={4}
+          />
+        </Field>
+        <Field label="Bio — muted paragraph">
+          <Textarea
+            value={content['about_bio_2']}
+            onChange={set('about_bio_2')}
+            placeholder="With a focus on the Cameroonian tech ecosystem..."
+            rows={4}
           />
         </Field>
       </div>

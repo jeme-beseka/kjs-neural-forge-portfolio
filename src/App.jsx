@@ -27,7 +27,7 @@ function PageTransition({ children }) {
       initial="initial"
       animate="enter"
       exit="exit"
-      style={{ minHeight: '100vh' }}
+      style={{ minHeight: '100vh', position: 'relative', zIndex: 1 }}
     >
       {children}
     </motion.div>

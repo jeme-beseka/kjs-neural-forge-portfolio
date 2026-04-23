@@ -74,7 +74,7 @@ function HexLogo({ onClick }) {
           opacity: 0.9,
         }}
       >
-        JEME<span style={{ color: 'var(--mode-text)', opacity: 0.6 }}>BESEKA</span>
+        JEME<span style={{ color: 'var(--mode-text)', opacity: 0.6 }}> BESEKA</span>
       </span>
 
       <style>{`

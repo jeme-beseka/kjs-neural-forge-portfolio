@@ -11,6 +11,7 @@ import {
   FileUp, Download, Trash2 as Trash2Alt,
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
+import { useTheme } from '../../context/ThemeContext';
 
 /* ═══════════════════════════════════════════════════════════════════════════
    SHARED PRIMITIVES

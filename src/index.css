@@ -1,0 +1,592 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   NEURAL FORGE — index.css
+   Base styles, theme variables, glassmorphism utilities, custom scrollbar
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@import "tailwindcss";
+@config "../tailwind.config.js";
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   1. THEME DEFINITIONS — data-theme attribute on <html>
+   Each theme sets 4 core CSS tokens + RGB triplets for alpha compositing
+   ─────────────────────────────────────────────────────────────────────────── */
+
+/* ── Cyber Blue (default) ───────────────────────────────────────────────── */
+[data-theme='cyber-blue'] {
+  --color-primary:      #00D4FF;
+  --color-accent:       #7C3AED;
+  --color-bg-dark:      #050B1A;
+  --color-bg-light:     #EEF6FF;
+  --color-primary-rgb:  0, 212, 255;
+  --color-accent-rgb:   124, 58, 237;
+  --color-surface:      rgba(0, 212, 255, 0.05);
+  --color-border:       rgba(0, 212, 255, 0.2);
+  --color-glow:         rgba(0, 212, 255, 0.4);
+  --color-text-primary: #E8F4FD;
+  --color-text-muted:   rgba(232, 244, 253, 0.6);
+  --gradient-hero:      linear-gradient(135deg, #050B1A 0%, #0A1628 50%, #060D1F 100%);
+  --gradient-card:      linear-gradient(135deg, rgba(0,212,255,0.05) 0%, rgba(124,58,237,0.05) 100%);
+}
+
+/* ── Deep Space ─────────────────────────────────────────────────────────── */
+[data-theme='deep-space'] {
+  --color-primary:      #4D9FFF;
+  --color-accent:       #FF2D78;
+  --color-bg-dark:      #040816;
+  --color-bg-light:     #EDF2FF;
+  --color-primary-rgb:  77, 159, 255;
+  --color-accent-rgb:   255, 45, 120;
+  --color-surface:      rgba(77, 159, 255, 0.05);
+  --color-border:       rgba(77, 159, 255, 0.2);
+  --color-glow:         rgba(77, 159, 255, 0.4);
+  --color-text-primary: #E8EEFF;
+  --color-text-muted:   rgba(232, 238, 255, 0.6);
+  --gradient-hero:      linear-gradient(135deg, #040816 0%, #080F1E 50%, #060A18 100%);
+  --gradient-card:      linear-gradient(135deg, rgba(77,159,255,0.05) 0%, rgba(255,45,120,0.05) 100%);
+}
+
+/* ── Arctic Neural ──────────────────────────────────────────────────────── */
+[data-theme='arctic-neural'] {
+  --color-primary:      #00B4D8;
+  --color-accent:       #90E0EF;
+  --color-bg-dark:      #03111A;
+  --color-bg-light:     #EAF8FC;
+  --color-primary-rgb:  0, 180, 216;
+  --color-accent-rgb:   144, 224, 239;
+  --color-surface:      rgba(0, 180, 216, 0.05);
+  --color-border:       rgba(0, 180, 216, 0.2);
+  --color-glow:         rgba(0, 180, 216, 0.4);
+  --color-text-primary: #E0F5FA;
+  --color-text-muted:   rgba(224, 245, 250, 0.6);
+  --gradient-hero:      linear-gradient(135deg, #03111A 0%, #061824 50%, #041520 100%);
+  --gradient-card:      linear-gradient(135deg, rgba(0,180,216,0.05) 0%, rgba(144,224,239,0.05) 100%);
+}
+
+/* ── Matrix Green ───────────────────────────────────────────────────────── */
+[data-theme='matrix-green'] {
+  --color-primary:      #00FF88;
+  --color-accent:       #00E5FF;
+  --color-bg-dark:      #010D05;
+  --color-bg-light:     #EAFFF4;
+  --color-primary-rgb:  0, 255, 136;
+  --color-accent-rgb:   0, 229, 255;
+  --color-surface:      rgba(0, 255, 136, 0.04);
+  --color-border:       rgba(0, 255, 136, 0.18);
+  --color-glow:         rgba(0, 255, 136, 0.4);
+  --color-text-primary: #CCFFE8;
+  --color-text-muted:   rgba(204, 255, 232, 0.6);
+  --gradient-hero:      linear-gradient(135deg, #010D05 0%, #021408 50%, #011006 100%);
+  --gradient-card:      linear-gradient(135deg, rgba(0,255,136,0.04) 0%, rgba(0,229,255,0.04) 100%);
+}
+
+/* ── Bio Circuit ────────────────────────────────────────────────────────── */
+[data-theme='bio-circuit'] {
+  --color-primary:      #39FF14;
+  --color-accent:       #ADFF2F;
+  --color-bg-dark:      #020B01;
+  --color-bg-light:     #EDFFD4;
+  --color-primary-rgb:  57, 255, 20;
+  --color-accent-rgb:   173, 255, 47;
+  --color-surface:      rgba(57, 255, 20, 0.04);
+  --color-border:       rgba(57, 255, 20, 0.18);
+  --color-glow:         rgba(57, 255, 20, 0.4);
+  --color-text-primary: #CCFFB8;
+  --color-text-muted:   rgba(204, 255, 184, 0.6);
+  --gradient-hero:      linear-gradient(135deg, #020B01 0%, #041202 50%, #030F01 100%);
+  --gradient-card:      linear-gradient(135deg, rgba(57,255,20,0.04) 0%, rgba(173,255,47,0.04) 100%);
+}
+
+/* ── Toxic Forge ────────────────────────────────────────────────────────── */
+[data-theme='toxic-forge'] {
+  --color-primary:      #00FFC8;
+  --color-accent:       #7FFF00;
+  --color-bg-dark:      #011A10;
+  --color-bg-light:     #EAFFF6;
+  --color-primary-rgb:  0, 255, 200;
+  --color-accent-rgb:   127, 255, 0;
+  --color-surface:      rgba(0, 255, 200, 0.05);
+  --color-border:       rgba(0, 255, 200, 0.2);
+  --color-glow:         rgba(0, 255, 200, 0.4);
+  --color-text-primary: #CCFFF0;
+  --color-text-muted:   rgba(204, 255, 240, 0.6);
+  --gradient-hero:      linear-gradient(135deg, #011A10 0%, #022416 50%, #011C12 100%);
+  --gradient-card:      linear-gradient(135deg, rgba(0,255,200,0.05) 0%, rgba(127,255,0,0.05) 100%);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   2. DARK / LIGHT MODE VARIABLES
+   Applied via .dark / .light classes on <html> (Tailwind darkMode: 'class')
+   ─────────────────────────────────────────────────────────────────────────── */
+
+/* Dark mode (default) */
+:root,
+.dark {
+  --mode-bg:           var(--color-bg-dark);
+  --mode-bg-secondary: color-mix(in srgb, var(--color-bg-dark) 85%, var(--color-primary) 15%);
+  --mode-text:         var(--color-text-primary);
+  --mode-text-muted:   var(--color-text-muted);
+  --mode-surface:      rgba(255, 255, 255, 0.04);
+  --mode-surface-hover:rgba(255, 255, 255, 0.08);
+  --mode-border:       var(--color-border);
+  --mode-glass-bg:     rgba(255, 255, 255, 0.04);
+  --mode-glass-border: rgba(255, 255, 255, 0.08);
+  --scrollbar-track:   rgba(255, 255, 255, 0.04);
+}
+
+/* Light mode */
+.light {
+  --mode-bg:           var(--color-bg-light);
+  --mode-bg-secondary: color-mix(in srgb, var(--color-bg-light) 90%, var(--color-primary) 10%);
+  --mode-text:         #0D1117;
+  --mode-text-muted:   rgba(13, 17, 23, 0.6);
+  --mode-surface:      rgba(0, 0, 0, 0.04);
+  --mode-surface-hover:rgba(0, 0, 0, 0.08);
+  --mode-border:       rgba(var(--color-primary-rgb), 0.3);
+  --mode-glass-bg:     rgba(255, 255, 255, 0.6);
+  --mode-glass-border: rgba(255, 255, 255, 0.8);
+  --scrollbar-track:   rgba(0, 0, 0, 0.06);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   3. BASE RESET & GLOBAL STYLES
+   ─────────────────────────────────────────────────────────────────────────── */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  /* Fallback — ThemeContext sets data-theme on load */
+  font-size: 16px;
+}
+
+body {
+  background-color: var(--mode-bg);
+  color: var(--mode-text);
+  font-family: 'Inter', sans-serif;
+  line-height: 1.6;
+  min-height: 100vh;
+  overflow-x: hidden;
+  transition: background-color 0.4s ease, color 0.4s ease;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   4. CUSTOM SCROLLBAR — matches theme primary color
+   ─────────────────────────────────────────────────────────────────────────── */
+
+/* Webkit (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-primary);
+  border-radius: 3px;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  opacity: 1;
+  box-shadow: 0 0 6px var(--color-primary);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-primary) var(--scrollbar-track);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   5. GLASSMORPHISM UTILITY CLASSES
+   ─────────────────────────────────────────────────────────────────────────── */
+
+@layer components {
+
+  /* ── .glass-card ──────────────────────────────────────────────────────── */
+  .glass-card {
+    background: var(--gradient-card);
+    backdrop-filter: blur(12px) saturate(1.5);
+    -webkit-backdrop-filter: blur(12px) saturate(1.5);
+    border: 1px solid var(--color-border);
+    border-radius: 16px;
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.37),
+      inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    transition:
+      box-shadow 0.3s ease,
+      border-color 0.3s ease,
+      transform 0.3s ease;
+  }
+
+  .glass-card:hover {
+    border-color: rgba(var(--color-primary-rgb), 0.4);
+    box-shadow:
+      0 12px 48px rgba(0, 0, 0, 0.45),
+      0 0 24px rgba(var(--color-primary-rgb), 0.12),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  }
+
+  /* ── .glass-nav ───────────────────────────────────────────────────────── */
+  .glass-nav {
+    background: rgba(var(--color-primary-rgb), 0.03);
+    backdrop-filter: blur(16px) saturate(1.8);
+    -webkit-backdrop-filter: blur(16px) saturate(1.8);
+    border-bottom: 1px solid rgba(var(--color-primary-rgb), 0.12);
+    box-shadow: 0 1px 32px rgba(0, 0, 0, 0.3);
+  }
+
+  .glass-nav--scrolled {
+    background: rgba(var(--color-primary-rgb), 0.06);
+    backdrop-filter: blur(24px) saturate(2);
+    -webkit-backdrop-filter: blur(24px) saturate(2);
+    border-bottom-color: rgba(var(--color-primary-rgb), 0.25);
+    box-shadow:
+      0 1px 40px rgba(0, 0, 0, 0.4),
+      0 0 20px rgba(var(--color-primary-rgb), 0.06);
+  }
+
+  /* ── .glass-button ────────────────────────────────────────────────────── */
+  .glass-button {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1.5rem;
+    background: rgba(var(--color-primary-rgb), 0.1);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(var(--color-primary-rgb), 0.3);
+    border-radius: 8px;
+    color: var(--color-primary);
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 500;
+    font-size: 0.875rem;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    transition:
+      background 0.25s ease,
+      border-color 0.25s ease,
+      box-shadow 0.25s ease,
+      transform 0.2s ease;
+    overflow: hidden;
+    text-decoration: none;
+  }
+
+  .glass-button::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      135deg,
+      rgba(var(--color-primary-rgb), 0.15) 0%,
+      transparent 60%
+    );
+    opacity: 0;
+    transition: opacity 0.25s ease;
+  }
+
+  .glass-button:hover {
+    background: rgba(var(--color-primary-rgb), 0.18);
+    border-color: rgba(var(--color-primary-rgb), 0.6);
+    box-shadow:
+      0 0 20px rgba(var(--color-primary-rgb), 0.25),
+      inset 0 0 12px rgba(var(--color-primary-rgb), 0.08);
+    transform: translateY(-2px);
+  }
+
+  .glass-button:hover::before {
+    opacity: 1;
+  }
+
+  .glass-button:active {
+    transform: translateY(0);
+  }
+
+  /* ── .glass-button--primary (solid primary variant) ──────────────────── */
+  .glass-button--primary {
+    background: rgba(var(--color-primary-rgb), 0.2);
+    border-color: var(--color-primary);
+    box-shadow: 0 0 16px rgba(var(--color-primary-rgb), 0.2);
+  }
+
+  .glass-button--primary:hover {
+    background: rgba(var(--color-primary-rgb), 0.3);
+    box-shadow:
+      0 0 32px rgba(var(--color-primary-rgb), 0.4),
+      0 8px 24px rgba(0, 0, 0, 0.3);
+  }
+
+  /* ── .glass-input ─────────────────────────────────────────────────────── */
+  .glass-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: rgba(var(--color-primary-rgb), 0.04);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(var(--color-primary-rgb), 0.18);
+    border-radius: 10px;
+    color: var(--mode-text);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.9375rem;
+    outline: none;
+    transition:
+      border-color 0.2s ease,
+      box-shadow 0.2s ease,
+      background 0.2s ease;
+  }
+
+  .glass-input::placeholder {
+    color: var(--mode-text-muted);
+  }
+
+  .glass-input:focus {
+    border-color: rgba(var(--color-primary-rgb), 0.6);
+    box-shadow:
+      0 0 0 3px rgba(var(--color-primary-rgb), 0.12),
+      0 0 16px rgba(var(--color-primary-rgb), 0.08);
+    background: rgba(var(--color-primary-rgb), 0.06);
+  }
+
+  .glass-input--error {
+    border-color: #FF4D6D;
+    box-shadow: 0 0 0 3px rgba(255, 77, 109, 0.12);
+  }
+
+  /* ── .glass-modal ─────────────────────────────────────────────────────── */
+  .glass-modal {
+    background: color-mix(in srgb, var(--color-bg-dark) 90%, var(--color-primary) 10%);
+    backdrop-filter: blur(24px) saturate(2);
+    -webkit-backdrop-filter: blur(24px) saturate(2);
+    border: 1px solid var(--color-border);
+    border-radius: 20px;
+    box-shadow:
+      0 24px 64px rgba(0, 0, 0, 0.6),
+      0 0 40px rgba(var(--color-primary-rgb), 0.08);
+  }
+
+  /* ── .glass-drawer ────────────────────────────────────────────────────── */
+  .glass-drawer {
+    background: color-mix(in srgb, var(--color-bg-dark) 92%, var(--color-primary) 8%);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-left: 1px solid var(--color-border);
+    box-shadow: -8px 0 40px rgba(0, 0, 0, 0.5);
+  }
+
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   6. SHIMMER TEXT UTILITY
+   ─────────────────────────────────────────────────────────────────────────── */
+
+.text-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--color-text-primary) 0%,
+    var(--color-primary) 30%,
+    var(--color-accent) 50%,
+    var(--color-primary) 70%,
+    var(--color-text-primary) 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 3s linear infinite;
+}
+
+.text-glow {
+  color: var(--color-primary);
+  text-shadow:
+    0 0 8px rgba(var(--color-primary-rgb), 0.8),
+    0 0 16px rgba(var(--color-primary-rgb), 0.4);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   7. SECTION HEADING UNDERLINE
+   ─────────────────────────────────────────────────────────────────────────── */
+
+.section-heading {
+  display: inline-block;
+  position: relative;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: clamp(1.75rem, 4vw, 2.75rem);
+  font-weight: 700;
+  color: var(--mode-text);
+}
+
+.section-heading::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(90deg, var(--color-primary), var(--color-accent), transparent);
+  border-radius: 2px;
+  transform-origin: left;
+  animation: fade-in 0.6s ease-out both;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   8. GLOW BORDER UTILITY
+   ─────────────────────────────────────────────────────────────────────────── */
+
+.glow-border {
+  border: 1px solid rgba(var(--color-primary-rgb), 0.4);
+  box-shadow:
+    0 0 16px rgba(var(--color-primary-rgb), 0.15),
+    inset 0 0 16px rgba(var(--color-primary-rgb), 0.05);
+}
+
+.glow-border:hover {
+  border-color: rgba(var(--color-primary-rgb), 0.7);
+  box-shadow:
+    0 0 32px rgba(var(--color-primary-rgb), 0.3),
+    inset 0 0 24px rgba(var(--color-primary-rgb), 0.08);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   9. HEX BADGE (logo hexagon)
+   ─────────────────────────────────────────────────────────────────────────── */
+
+.hex-badge {
+  clip-path: polygon(50% 0%, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   10. READING PROGRESS BAR
+   ─────────────────────────────────────────────────────────────────────────── */
+
+.reading-progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+  z-index: 999;
+  transform-origin: left;
+  box-shadow: 0 0 10px rgba(var(--color-primary-rgb), 0.6);
+  transition: width 0.1s linear;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   11. SELECTION COLOR
+   ─────────────────────────────────────────────────────────────────────────── */
+
+::selection {
+  background: rgba(var(--color-primary-rgb), 0.3);
+  color: var(--color-text-primary);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   12. SKILL PROGRESS BAR
+   ─────────────────────────────────────────────────────────────────────────── */
+
+.skill-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+  border-radius: inherit;
+  box-shadow: 0 0 8px rgba(var(--color-primary-rgb), 0.5);
+  transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   13. CODE BLOCK (blog markdown)
+   ─────────────────────────────────────────────────────────────────────────── */
+
+.prose-forge pre {
+  background: rgba(var(--color-primary-rgb), 0.05);
+  border: 1px solid rgba(var(--color-primary-rgb), 0.15);
+  border-radius: 10px;
+  padding: 1.25rem;
+  overflow-x: auto;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.875rem;
+  line-height: 1.7;
+}
+
+.prose-forge blockquote {
+  border-left: 3px solid var(--color-accent);
+  padding-left: 1rem;
+  color: var(--mode-text-muted);
+  font-style: italic;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   14. THEME TRANSITION OVERLAY
+   Applied briefly when switching themes to prevent flash
+   ─────────────────────────────────────────────────────────────────────────── */
+
+.theme-transitioning * {
+  transition:
+    background-color 0.4s ease,
+    border-color 0.4s ease,
+    color 0.3s ease,
+    box-shadow 0.4s ease !important;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   15. RESPONSIVE CANVAS (living backgrounds)
+   ─────────────────────────────────────────────────────────────────────────── */
+
+.living-bg-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+  display: block;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   16. LOADING SKELETON
+   ─────────────────────────────────────────────────────────────────────────── */
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(var(--color-primary-rgb), 0.05) 25%,
+    rgba(var(--color-primary-rgb), 0.1) 50%,
+    rgba(var(--color-primary-rgb), 0.05) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: 8px;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   17. FOCUS VISIBLE (accessibility)
+   ─────────────────────────────────────────────────────────────────────────── */
+
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 3px;
+  border-radius: 4px;
+}

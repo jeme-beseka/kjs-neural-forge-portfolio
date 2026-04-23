@@ -10,6 +10,7 @@ import BlogList          from './pages/BlogList';
 import BlogPost          from './pages/BlogPost';
 import AdminLogin        from './pages/admin/AdminLogin';
 import AdminDashboard    from './pages/admin/AdminDashboard';
+import { Analytics } from '@vercel/analytics/react';
 
 /* ─────────────────────────────────────────────────────────────────────────────
    PAGE TRANSITION WRAPPER
@@ -127,6 +128,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <AnimatedRoutes />
+      <Analytics />
     </BrowserRouter>
   );
 }
